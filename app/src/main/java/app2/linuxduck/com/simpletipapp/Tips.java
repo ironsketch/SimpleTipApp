@@ -5,8 +5,6 @@ import java.util.Date;
 public class Tips {
     // Date of transaction
     private Date date;
-    // Title of the tip you created
-    private String title;
     // Store/restaurant where the tip occurred
     private String place;
     // Amount of the tip given
@@ -19,9 +17,8 @@ public class Tips {
     private String category;
 
     public Tips(){}
-    public Tips(Date newDate, String newTitle, String newPlace, double newTip, double newBill, double newTax, String newCategory){
+    public Tips(Date newDate, String newPlace, double newBill, double newTax, double newTip, String newCategory){
         date = newDate;
-        title = newTitle;
         place = newPlace;
         tip = newTip;
         bill = newBill;
@@ -33,14 +30,17 @@ public class Tips {
         return date.toString();
     }
 
-    public String getTitle(){return title;}
     public String getPlace(){return place;}
     public double getBill(){return bill;}
     public double getTax(){return tax;}
     public String getCategory(){return category;}
     public double getTip(){return tip;}
+    public double getTotal(){
+        double total = calculateTipWithTax(tip);
+        total += tax + bill;
+        return total;
+    }
     public void updateDate(Date newDate){date = newDate;}
-    public void updateTitle(String newTitle){title = newTitle;}
     public void updatePlace(String newPlace){place = newPlace;}
     public void setTipChosen(double newTip){
         tip = newTip;

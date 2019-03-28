@@ -25,11 +25,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
+
+    // Format
+    DecimalFormat numberFormat;
 
     // Ints
     private int LONGduration;
@@ -75,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
     // EditTexts
     private EditText newCategoryEditText;
-    private EditText newTitleEditText;
     private EditText newPlaceEditText;
     private EditText newBillEditText;
     private EditText newTaxEditText;
@@ -92,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Format
+        numberFormat = new DecimalFormat("#.00");
 
         // Ints
         LONGduration = Toast.LENGTH_LONG;
@@ -129,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
         // EditTexts
         newCategoryEditText = findViewById(R.id.newcategoryedittext);
-        newTitleEditText = findViewById(R.id.titleedittext);
         newPlaceEditText = findViewById(R.id.placeedittext);
         newBillEditText = findViewById(R.id.billedittext);
         newTaxEditText = findViewById(R.id.taxedittext);
@@ -180,8 +185,6 @@ public class MainActivity extends AppCompatActivity {
 
                             try {
                                 Date tempDate = new Date();
-                                String tempTitle = newTitleEditText.getText().toString();
-                                newTitleEditText.getText().clear();
                                 String tempPlace = newPlaceEditText.getText().toString();
                                 newPlaceEditText.getText().clear();
                                 double tempBill = Double.valueOf(newBillEditText.getText().toString());
@@ -191,16 +194,16 @@ public class MainActivity extends AppCompatActivity {
                                 String tempCategory = categoriesSpinner.getSelectedItem().toString();
                                 double tempTip = Double.valueOf(percentagesSpinner.getSelectedItem().toString());
 
-                                Tips tempTips = new Tips(tempDate, tempTitle, tempPlace, tempBill, tempTax, tempTip, tempCategory);
+                                Tips tempTips = new Tips(tempDate, tempPlace, tempBill, tempTax, tempTip * .01, tempCategory);
 
                                 files = path.listFiles();
                                 for (File eachFile : files) {
                                     if (eachFile.getName().equals("tips.txt")) {
                                         try {
                                             FileOutputStream catOut = openFileOutput("tips.txt", MODE_APPEND);
-                                            catOut.write((sdf.format(tempDate) + "," + tempTitle + "," + tempPlace + "," +
+                                            catOut.write((sdf.format(tempDate) + "," + tempPlace + "," +
                                                     String.valueOf(tempBill) + "," + String.valueOf(tempTax) + "," +
-                                                    String.valueOf(tempTip) + "," + tempCategory + "\n").getBytes());
+                                                    String.valueOf(tempTip * .01) + "," + tempCategory + "\n").getBytes());
                                             allTips.add(tempTips);
                                             catOut.close();
                                             tipsExists = true;
@@ -214,9 +217,9 @@ public class MainActivity extends AppCompatActivity {
                                     FileOutputStream newCategoryFile;
                                     try {
                                         newCategoryFile = openFileOutput("tips.txt", Context.MODE_PRIVATE);
-                                        newCategoryFile.write((sdf.format(tempDate) + "," + tempTitle + "," + tempPlace + "," +
+                                        newCategoryFile.write((sdf.format(tempDate) + "," + tempPlace + "," +
                                                 String.valueOf(tempBill) + "," + String.valueOf(tempTax) + "," +
-                                                String.valueOf(tempTip) + "," + tempCategory + "\n").getBytes());
+                                                String.valueOf(tempTip * .01) + "," + tempCategory + "\n").getBytes());
                                         allTips.add(tempTips);
                                         newCategoryFile.close();
                                         tipsExists = true;
@@ -260,15 +263,9 @@ public class MainActivity extends AppCompatActivity {
                                 if(eachTip.getCategory().equals(categories.get(position))){
                                     LayoutParams lparams = new LayoutParams(
                                             LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                                    LayoutParams lparamsTip = new LayoutParams(
+                                    LayoutParams lparamsTotal = new LayoutParams(
                                             LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                                    lparamsTip.setMargins(0,0,0,40);
-
-                                    TextView title = new TextView(getApplicationContext());
-                                    title.setLayoutParams(lparams);
-                                    title.setText(eachTip.getTitle());
-                                    title.setTextSize(28);
-                                    title.setTypeface(null, Typeface.BOLD);
+                                    lparamsTotal.setMargins(0,0,0,40);
 
                                     TextView date = new TextView(getApplicationContext());
                                     date.setLayoutParams(lparams);
@@ -283,33 +280,42 @@ public class MainActivity extends AppCompatActivity {
                                     TextView bill = new TextView(getApplicationContext());
                                     bill.setLayoutParams(lparams);
                                     String tempBill = getResources().getString(R.string.bill) + ":  " + getResources().getString(R.string.dollarsign)
-                                            + String.valueOf(eachTip.getBill());
+                                            + String.valueOf(numberFormat.format(eachTip.getBill()));
                                     bill.setText(tempBill);
                                     bill.setTextSize(16);
 
                                     TextView tax = new TextView(getApplicationContext());
                                     tax.setLayoutParams(lparams);
                                     String tempTax = getResources().getString(R.string.tax) + ": " + getResources().getString(R.string.dollarsign)
-                                            + String.valueOf(eachTip.getTax());
+                                            + String.valueOf(numberFormat.format(eachTip.getTax()));
                                     tax.setText(String.valueOf(tempTax));
                                     tax.setTextSize(16);
 
                                     TextView tip = new TextView(getApplicationContext());
-                                    tip.setLayoutParams(lparamsTip);
+                                    tip.setLayoutParams(lparams);
                                     String tempTip = getResources().getString(R.string.tip) + ": " + getResources().getString(R.string.dollarsign)
-                                            + String.valueOf(eachTip.getTip());
+                                            + String.valueOf(numberFormat.format(eachTip.calculateTipWithTax(eachTip.getTip())));
                                     tip.setText(tempTip);
                                     tip.setTextColor(getResources().getColor(R.color.green));
                                     tip.setTextSize(24);
 
+                                    TextView totalCost = new TextView(getApplicationContext());
+                                    totalCost.setLayoutParams(lparamsTotal);
+                                    String tempTotal = getResources().getString(R.string.total) + ": " + getResources().getString(R.string.dollarsign)
+                                            + String.valueOf(numberFormat.format(eachTip.getTotal()));
+                                    totalCost.setText(tempTotal);
+                                    totalCost.setTextColor(getResources().getColor(R.color.red));
+                                    totalCost.setTextSize(24);
+
                                     if(tipsLinearLayout != null) {
-                                        tipsLinearLayout.addView(title);
                                         tipsLinearLayout.addView(date);
                                         tipsLinearLayout.addView(place);
                                         tipsLinearLayout.addView(bill);
                                         tipsLinearLayout.addView(tax);
                                         tipsLinearLayout.addView(tip);
+                                        tipsLinearLayout.addView(totalCost);
                                     }
+                                    tipsLinearLayout.setVisibility(View.VISIBLE);
                                 }
                             }
 
@@ -319,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                 } else {
                     categoriesListView.setVisibility(View.GONE);
+                    categoriesListView.setAdapter(categoriesAdapter);
                     moreOptionsBoolean = false;
                 }
             }
@@ -409,13 +416,12 @@ public class MainActivity extends AppCompatActivity {
 
                         // Get the date from the file :D
                         Date tempDate = new SimpleDateFormat("yyyy/mm/dd HH:mm:ss").parse(lineData[0]);
-                        String tempTitle = lineData[1];
-                        String tempPlace = lineData[2];
-                        double tempTip = Double.parseDouble(lineData[3]);
-                        double tempBill = Double.parseDouble(lineData[4]);
-                        double tempTax = Double.parseDouble(lineData[5]);
-                        String tempCat = lineData[6];
-                        Tips temp = new Tips(tempDate, tempTitle, tempPlace, tempTip, tempBill, tempTax, tempCat);
+                        String tempPlace = lineData[1];
+                        double tempBill = Double.parseDouble(lineData[2]);
+                        double tempTax = Double.parseDouble(lineData[3]);
+                        double tempTip = Double.parseDouble(lineData[4]);
+                        String tempCat = lineData[5];
+                        Tips temp = new Tips(tempDate, tempPlace, tempBill, tempTax, tempTip, tempCat);
                         allTips.add(temp);
                     }
                     br.close();
