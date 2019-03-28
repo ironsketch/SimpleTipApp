@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">SimpleTipApp</string>
+    <string name="submit">Submit</string>
+    <string name="title">Title</string>
+    <string name="place">Place</string>
+    <string name="bill">Bill</string>
+    <string name="tax">Tax</string>
+    <string name="tip">Tip</string>
+    <string name="category">Category</string>
+    <string name="custom">Custom</string>
+    <string name="you_didnt_fill_everything_out">You didn\'t fill out all the fields! :(</string>
+    <string name="dollarsign">$</string>
+    <string-array name="percentage">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+</resources>
